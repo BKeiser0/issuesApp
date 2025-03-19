@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Hash the password with the MD5 and salt
     $pwd_hash = md5($password . $salt); // Use MD5 hashing with the salt
 
-    // Insert the user into the database with the salt
-    $stmt = $pdo->prepare("INSERT INTO iss_persons (email, pwd_hash, pwd_salt, fname, lname) VALUES (?, ?, ?, ?, ?)");
+    // Insert the user into the database with the salt and default 'admin' as 'no'
+    $stmt = $pdo->prepare("INSERT INTO iss_persons (email, pwd_hash, pwd_salt, fname, lname, admin) VALUES (?, ?, ?, ?, ?, 'no')");
     $stmt->execute([$email, $pwd_hash, $salt, $fname, $lname]);
 
     // Redirect to login page after successful registration

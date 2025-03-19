@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     $issue_id = $_POST['issue_id'];
     $short_comment = $_POST['short_comment'];
     $long_comment = $_POST['long_comment'];
-    
+
     // Insert comment into the database
     $stmt = $pdo->prepare("INSERT INTO iss_comments (per_id, iss_id, short_comment, long_comment, posted_date) 
                            VALUES (?, ?, ?, ?, NOW())");
@@ -57,11 +57,15 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-                <a class="nav-link btn btn-success btn-lg text-white ms-auto" href="add_issue.php">Add New Issue</a>
+                <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link btn btn-success btn-lg text-white ms-3" href="login.php">Logout</a>
             </li>
         </ul>
     </div>
 </nav>
+
 
 <div class="container my-5">
     <!-- Heading -->
@@ -95,8 +99,14 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($issue['priority']); ?></td>
                         <td><?php echo $issue['open_date']; ?></td>
                         <td>
-                            <a href="edit_issue.php?id=<?php echo $issue['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                            <a href="delete_issue.php?id=<?php echo $issue['id']; ?>" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm">Delete</a>
+                            <!-- Check if the current user is the creator or an admin -->
+                            <?php if ($issue['created_by'] == $user_id || (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes')): ?>
+                                <a href="edit_issue.php?id=<?php echo $issue['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="delete_issue.php?id=<?php echo $issue['id']; ?>" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm">Delete</a>
+                            <?php else: ?>
+                                <!-- Deny access to editing or deleting -->
+                                <!-- <span class="text-muted">No actions available</span> -->
+                            <?php endif; ?>
                             <button class="btn btn-primary btn-sm" onclick="showComments(<?php echo $issue['id']; ?>)">Comments</button>
                         </td>
                     </tr>
@@ -160,4 +170,3 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </body>
 </html>
-    

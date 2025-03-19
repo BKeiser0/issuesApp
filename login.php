@@ -6,8 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Fetch user data from the database
-    $stmt = $pdo->prepare("SELECT id, email, pwd_hash, pwd_salt FROM iss_persons WHERE email = ?");
+    // Fetch user data from the database including admin status
+    $stmt = $pdo->prepare("SELECT id, email, pwd_hash, pwd_salt, admin FROM iss_persons WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Successful login
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['admin'] = $user['admin']; // Store admin status in the session
+
             header("Location: issues_list.php");
             exit;
         } else {
