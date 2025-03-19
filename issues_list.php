@@ -12,8 +12,14 @@ if (!$user_id) {
     exit;
 }
 
-// Fetch issues from the database
-$stmt = $pdo->prepare("SELECT * FROM iss_issues ORDER BY project ASC");
+// Fetch issues from the database, ordered by priority (High -> Medium -> Low)
+$stmt = $pdo->prepare("SELECT * FROM iss_issues 
+                       ORDER BY 
+                           CASE 
+                               WHEN priority = 'High' THEN 1
+                               WHEN priority = 'Medium' THEN 2
+                               WHEN priority = 'Low' THEN 3
+                           END ASC, open_date DESC");
 $stmt->execute();
 $issues = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -84,7 +90,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th scope="col">Project Name</th>
                         <th scope="col">Issue Title</th>
                         <th scope="col">Description</th>
-                        <th scope="col">Status</th>
+                        <th scope="col">Priority</th>
                         <th scope="col">Created At</th>
                         <th scope="col">Actions</th>
                     </tr>

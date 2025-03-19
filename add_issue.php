@@ -7,8 +7,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
     $priority = $_POST['priority'];
     $org = $_POST['org'];
     $project = $_POST['project'];
-    $open_date = $_POST['open_date'];
-    $close_date = $_POST['close_date'];
+
+    // Set the open date to the current date and time
+    $open_date = date('Y-m-d H:i:s'); // Current date and time in 'Y-m-d H:i:s' format
+    $close_date = null; // Close date is not provided during creation
 
     // Insert new issue into the database
     $stmt = $pdo->prepare("INSERT INTO iss_issues (short_description, long_description, priority, org, project, open_date, close_date) 
@@ -41,8 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
             <textarea class="form-control" name="long_description" rows="3" required></textarea>
         </div>
         <div class="mb-3">
-            <label for="priority" class="form-label">Priority</label>
-            <input type="text" class="form-control" name="priority" required>
+        <label for="project" class="form-label">Issue Priority</label>
+        <select class="form-control" name="priority" required>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+
         </div>
         <div class="mb-3">
             <label for="org" class="form-label">Organization</label>
@@ -54,15 +61,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
         </div>
         <div class="mb-3">
             <label for="open_date" class="form-label">Open Date</label>
-            <input type="date" class="form-control" name="open_date" required>
+            <input type="text" class="form-control" value="<?php echo date('Y-m-d H:i:s'); ?>" readonly>
+            <small class="form-text text-muted">This will be set to the current date and time automatically.</small>
         </div>
-        <div class="mb-3">
-            <label for="close_date" class="form-label">Close Date</label>
-            <input type="date" class="form-control" name="close_date" required>
-        </div>
+        <!-- Removed close date input field -->
+
         <button type="submit" name="add_issue" class="btn btn-primary">Add Issue</button>
     </form>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
