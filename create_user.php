@@ -43,6 +43,6 @@ function createUser($fname, $lname, $mobile, $email, $plain_password, $is_admin)
 }
 
 // Test user creation (Change the details as needed)
-createUser('Brady', 'Keiser', '231-231-2310', 'bjkeiser@svsu.edu', 'SecurePass123', 'no');
+createUser('Brady', 'Keiser', '231-555-0000', 'bjkeiser@svsu.edu', 'SecurePass123', 'no');
 
 ?>

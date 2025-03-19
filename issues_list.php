@@ -1,6 +1,17 @@
 <?php
 require_once 'db_connect.php';
 
+// Start the session
+session_start();
+
+// Check if the user is logged in and store the user ID
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+if (!$user_id) {
+    // Redirect to login page if not logged in (you can customize this as needed)
+    header('Location: login.php');
+    exit;
+}
+
 // Fetch issues from the database
 $stmt = $pdo->prepare("SELECT * FROM iss_issues ORDER BY project ASC");
 $stmt->execute();
@@ -9,7 +20,6 @@ $issues = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Handle comment submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     $issue_id = $_POST['issue_id'];
-    $user_id = 1; // Assuming user ID is 1 for now (replace with actual session user ID)
     $short_comment = $_POST['short_comment'];
     $long_comment = $_POST['long_comment'];
     
@@ -19,8 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     $stmt->execute([$user_id, $issue_id, $short_comment, $long_comment]);
 }
 
-// Fetch all comments
-$comments_stmt = $pdo->prepare("SELECT * FROM iss_comments ORDER BY posted_date DESC");
+// Fetch all comments with the username from the iss_persons table
+$comments_stmt = $pdo->prepare("SELECT c.*, p.fname, p.lname FROM iss_comments c 
+                                LEFT JOIN iss_persons p ON c.per_id = p.id
+                                ORDER BY c.posted_date DESC");
 $comments_stmt->execute();
 $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -45,7 +57,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-                <a class="nav-link" href="add_issue.php">Add New Issue</a>
+                <a class="nav-link btn btn-success btn-lg text-white ms-auto" href="add_issue.php">Add New Issue</a>
             </li>
         </ul>
     </div>
@@ -112,7 +124,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <?php foreach ($comments as $comment): ?>
                                         <?php if ($comment['iss_id'] == $issue['id']): ?>
                                             <li class="list-group-item">
-                                                <strong>User <?php echo $comment['per_id']; ?>:</strong> <?php echo htmlspecialchars($comment['short_comment']); ?>
+                                                <strong><?php echo htmlspecialchars($comment['fname']) . ' ' . htmlspecialchars($comment['lname']); ?>:</strong> <?php echo htmlspecialchars($comment['short_comment']); ?>
                                                 <p><?php echo htmlspecialchars($comment['long_comment']); ?></p>
                                                 <p><em>Posted on: <?php echo $comment['posted_date']; ?></em></p>
                                             </li>
@@ -148,3 +160,4 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </body>
 </html>
+    

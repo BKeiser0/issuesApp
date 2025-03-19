@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="submit" class="btn btn-primary">Login</button>
-                            <a href="register.php" class="btn btn-link btn-sm">Sign Up</a>
+                            <a href="signup.php" class="btn btn-link btn-sm">Sign Up</a>
                         </div>
                     </form>
                 </div>
