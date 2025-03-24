@@ -90,6 +90,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th scope="col">Project Name</th>
                         <th scope="col">Issue Title</th>
                         <th scope="col">Description</th>
+                        <th scope="col">Status</th> <!-- New Status Column -->
                         <th scope="col">Priority</th>
                         <th scope="col">Created At</th>
                         <th scope="col">Actions</th>
@@ -102,19 +103,45 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($issue['project']); ?></td>
                         <td><?php echo htmlspecialchars($issue['short_description']); ?></td>
                         <td><?php echo htmlspecialchars($issue['long_description']); ?></td>
+                        <td>
+            <?php echo htmlspecialchars($issue['status']); ?> <!-- Display Status -->
+        </td>
                         <td><?php echo htmlspecialchars($issue['priority']); ?></td>
                         <td><?php echo $issue['open_date']; ?></td>
                         <td>
-                            <!-- Check if the current user is the creator or an admin -->
-                            <?php if ($issue['created_by'] == $user_id || (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes')): ?>
-                                <a href="edit_issue.php?id=<?php echo $issue['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                                <a href="delete_issue.php?id=<?php echo $issue['id']; ?>" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm">Delete</a>
-                            <?php else: ?>
-                                <!-- Deny access to editing or deleting -->
-                                <!-- <span class="text-muted">No actions available</span> -->
-                            <?php endif; ?>
-                            <button class="btn btn-primary btn-sm" onclick="showComments(<?php echo $issue['id']; ?>)">Comments</button>
-                        </td>
+    <!-- Check if the current user is the creator or an admin -->
+    <?php if ($issue['created_by'] == $user_id || (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes')): ?>
+        <a href="edit_issue.php?id=<?php echo $issue['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+        <a href="delete_issue.php?id=<?php echo $issue['id']; ?>" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm">Delete</a>
+    <?php else: ?>
+        <!-- Deny access to editing or deleting -->
+        <!-- <span class="text-muted">No actions available</span> -->
+    <?php endif; ?>
+
+    <!-- Comments Button -->
+    <button class="btn btn-primary btn-sm" onclick="showComments(<?php echo $issue['id']; ?>)">Comments</button>
+
+    <!-- Mark as Resolved Button (only shown if the issue is not resolved) -->
+    <?php if ($issue['status'] == 'Not Resolved'): ?>
+        <form method="POST" action="mark_resolved.php" style="display:inline;" id="markResolvedForm_<?php echo $issue['id']; ?>">
+            <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
+            <button type="button" class="btn btn-success btn-sm" onclick="confirmResolution(<?php echo $issue['id']; ?>)">
+                Mark as Resolved
+            </button>
+        </form>
+    <?php else: ?>
+        <!-- If the issue is resolved, show 'Mark as Not Resolved' button for admins -->
+        <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
+            <form method="POST" action="mark_not_resolved.php" style="display:inline;" id="markNotResolvedForm_<?php echo $issue['id']; ?>">
+                <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
+                <button type="button" class="btn btn-warning btn-sm" onclick="confirmNotResolved(<?php echo $issue['id']; ?>)">
+                    Mark as Not Resolved
+                </button>
+            </form>
+        <?php endif; ?>
+    <?php endif; ?>
+</td>
+
                     </tr>
 
                     <!-- Comments Section for this Issue -->
@@ -172,6 +199,37 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
             commentSection.style.display = "none"; // Hide the comment section
         }
     }
+
+    function confirmResolution(issueId) {
+        // Show confirmation dialog
+        var confirmed = confirm("Are you sure you want to mark this issue as resolved?");
+        
+        if (confirmed) {
+            // If confirmed, submit the form
+            document.getElementById('markResolvedForm_' + issueId).submit();
+        }
+    }
+
+
+    // Confirm dialog for Mark as Resolved
+    function confirmResolution(issueId) {
+        var confirmed = confirm("Are you sure you want to mark this issue as resolved?");
+        
+        if (confirmed) {
+            document.getElementById('markResolvedForm_' + issueId).submit();
+        }
+    }
+
+
+     // Confirm dialog for Mark as Not Resolved (for admins)
+     function confirmNotResolved(issueId) {
+        var confirmed = confirm("Are you sure you want to mark this issue as not resolved?");
+        
+        if (confirmed) {
+            document.getElementById('markNotResolvedForm_' + issueId).submit();
+        }
+    }
+    
 </script>
 
 </body>
