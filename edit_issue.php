@@ -15,12 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_issue'])) {
     $priority = $_POST['priority'];
     $org = $_POST['org'];
     $project = $_POST['project'];
-    $open_date = $_POST['open_date'];
-    $close_date = $_POST['close_date'];
 
     // Update the issue
-    $stmt = $pdo->prepare("UPDATE iss_issues SET short_description = ?, long_description = ?, priority = ?, org = ?, project = ?, open_date = ?, close_date = ? WHERE id = ?");
-    $stmt->execute([$short_description, $long_description, $priority, $org, $project, $open_date, $close_date, $issue_id]);
+    $stmt = $pdo->prepare("UPDATE iss_issues SET short_description = ?, long_description = ?, priority = ?, org = ?, project = ? WHERE id = ?");
+    $stmt->execute([$short_description, $long_description, $priority, $org, $project, $issue_id]);
 
     header('Location: issues_list.php');
     exit();
@@ -49,7 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_issue'])) {
         </div>
         <div class="mb-3">
             <label for="priority" class="form-label">Priority</label>
-            <input type="text" class="form-control" name="priority" value="<?php echo htmlspecialchars($issue['priority']); ?>" required>
+            <select class="form-control" name="priority" required>
+                <option value="Low" <?php echo ($issue['priority'] == 'Low') ? 'selected' : ''; ?>>Low</option>
+                <option value="Medium" <?php echo ($issue['priority'] == 'Medium') ? 'selected' : ''; ?>>Medium</option>
+                <option value="High" <?php echo ($issue['priority'] == 'High') ? 'selected' : ''; ?>>High</option>
+            </select>
         </div>
         <div class="mb-3">
             <label for="org" class="form-label">Organization</label>
@@ -58,14 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_issue'])) {
         <div class="mb-3">
             <label for="project" class="form-label">Project Name</label>
             <input type="text" class="form-control" name="project" value="<?php echo htmlspecialchars($issue['project']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="open_date" class="form-label">Open Date</label>
-            <input type="date" class="form-control" name="open_date" value="<?php echo $issue['open_date']; ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="close_date" class="form-label">Close Date</label>
-            <input type="date" class="form-control" name="close_date" value="<?php echo $issue['close_date']; ?>" required>
         </div>
         <button type="submit" name="update_issue" class="btn btn-primary">Update Issue</button>
     </form>
