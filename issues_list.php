@@ -62,6 +62,14 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
+            <!-- Add "People Management" button only for admins -->
+            <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-success btn-lg text-white ms-3" href="people.php">People Management</a>
+                </li>
+            <?php endif; ?>
+
+            <!-- Other navbar items -->
             <li class="nav-item">
                 <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
             </li>
@@ -71,6 +79,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
         </ul>
     </div>
 </nav>
+
 
 
 <div class="container my-5">
