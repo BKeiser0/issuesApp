@@ -64,21 +64,22 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
         <ul class="navbar-nav ms-auto">
             <!-- Add "People Management" button only for admins -->
             <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
-                <li class="nav-item">
-                    <a class="nav-link btn btn-success btn-lg text-white ms-3" href="people.php">People Management</a>
+                <li class="nav-item ms-3"> <!-- Add spacing with ms-3 -->
+                    <a class="nav-link btn btn-success btn-lg text-white" href="people.php">People Management</a>
                 </li>
             <?php endif; ?>
 
             <!-- Other navbar items -->
-            <li class="nav-item">
+            <li class="nav-item ms-3"> <!-- Add spacing with ms-3 -->
                 <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link btn btn-success btn-lg text-white ms-3" href="login.php">Logout</a>
+            <li class="nav-item ms-3"> <!-- Add spacing with ms-3 -->
+                <a class="nav-link btn btn-success btn-lg text-white" href="login.php">Logout</a>
             </li>
         </ul>
     </div>
 </nav>
+
 
 
 
@@ -171,18 +172,33 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <button type="submit" name="comment" class="btn btn-primary btn-sm">Add Comment</button>
                                 </form>
 
-                                <!-- Display Comments for this Issue -->
-                                <ul class="list-group mt-3">
-                                    <?php foreach ($comments as $comment): ?>
-                                        <?php if ($comment['iss_id'] == $issue['id']): ?>
-                                            <li class="list-group-item">
-                                                <strong><?php echo htmlspecialchars($comment['fname']) . ' ' . htmlspecialchars($comment['lname']); ?>:</strong> <?php echo htmlspecialchars($comment['short_comment']); ?>
-                                                <p><?php echo htmlspecialchars($comment['long_comment']); ?></p>
-                                                <p><em>Posted on: <?php echo $comment['posted_date']; ?></em></p>
-                                            </li>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                </ul>
+                               <!-- Display Comments for this Issue -->
+<!-- Display Comments for this Issue -->
+<ul class="list-group mt-3">
+    <?php foreach ($comments as $comment): ?>
+        <?php if ($comment['iss_id'] == $issue['id']): ?>
+            <li class="list-group-item">
+                <strong><?php echo htmlspecialchars($comment['fname']) . ' ' . htmlspecialchars($comment['lname']); ?>:</strong> 
+                <?php echo htmlspecialchars($comment['short_comment']); ?>
+                <p><?php echo htmlspecialchars($comment['long_comment']); ?></p>
+                <p><em>Posted on: <?php echo $comment['posted_date']; ?></em></p>
+
+                <!-- Show Edit and Delete buttons for the user who created the comment or admin -->
+                <?php if ($comment['per_id'] == $user_id || isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
+                    <!-- Edit Button -->
+                    <a href="edit_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-warning btn-sm">Edit Comment</a>
+
+                    <!-- Delete Button -->
+                    <a href="delete_comment.php?id=<?php echo $comment['id']; ?>" 
+                       onclick="return confirm('Are you sure you want to delete this comment?');" 
+                       class="btn btn-danger btn-sm">Delete Comment</a>
+                <?php endif; ?>
+            </li>
+        <?php endif; ?>
+    <?php endforeach; ?>
+</ul>
+
+
                             </div>
                         </td>
                     </tr>

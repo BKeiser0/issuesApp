@@ -10,7 +10,7 @@ $is_admin = isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes';
 
 if (!$user_id || !$is_admin) {
     // Redirect to the main page or login page if the user is not an admin
-    header('Location: index.php');
+    header('Location: issues_list.php');
     exit;
 }
 
