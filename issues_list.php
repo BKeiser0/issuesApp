@@ -33,6 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     $stmt = $pdo->prepare("INSERT INTO iss_comments (per_id, iss_id, short_comment, long_comment, posted_date) 
                            VALUES (?, ?, ?, ?, NOW())");
     $stmt->execute([$user_id, $issue_id, $short_comment, $long_comment]);
+
+      // Redirect to the same page to avoid resubmitting the form on refresh
+      header('Location: ' . $_SERVER['REQUEST_URI']);
+      exit;  // Make sure to exit after the redirect
 }
 
 // Fetch all comments with the username from the iss_persons table
