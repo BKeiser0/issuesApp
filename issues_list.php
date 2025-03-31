@@ -59,7 +59,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <!-- Navbar (optional) -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark ps-3">
     <a class="navbar-brand" href="#">Issues Tracker</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -74,12 +74,14 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
             <li class="nav-item ms-3">
                 <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
             </li>
-            <li class="nav-item ms-3">
+            <li class="nav-item ms-3 me-3"> <!-- Add margin-right to only the Logout button -->
                 <a class="nav-link btn btn-success btn-lg text-white" href="login.php">Logout</a>
             </li>
         </ul>
     </div>
 </nav>
+
+
 
 <div class="container my-5">
     <h1 class="text-center mb-4">Issues List</h1>
