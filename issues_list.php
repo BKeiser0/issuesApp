@@ -62,32 +62,24 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-            <!-- Add "People Management" button only for admins -->
             <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
-                <li class="nav-item ms-3"> <!-- Add spacing with ms-3 -->
+                <li class="nav-item ms-3">
                     <a class="nav-link btn btn-success btn-lg text-white" href="people.php">People Management</a>
                 </li>
             <?php endif; ?>
-
-            <!-- Other navbar items -->
-            <li class="nav-item ms-3"> <!-- Add spacing with ms-3 -->
+            <li class="nav-item ms-3">
                 <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
             </li>
-            <li class="nav-item ms-3"> <!-- Add spacing with ms-3 -->
+            <li class="nav-item ms-3">
                 <a class="nav-link btn btn-success btn-lg text-white" href="login.php">Logout</a>
             </li>
         </ul>
     </div>
 </nav>
 
-
-
-
 <div class="container my-5">
-    <!-- Heading -->
     <h1 class="text-center mb-4">Issues List</h1>
 
-    <!-- Issues Table -->
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
             <h5>Issue Details</h5>
@@ -100,10 +92,11 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th scope="col">Project Name</th>
                         <th scope="col">Issue Title</th>
                         <th scope="col">Description</th>
-                        <th scope="col">Status</th> <!-- New Status Column -->
+                        <th scope="col">Status</th>
                         <th scope="col">Priority</th>
                         <th scope="col">Created At</th>
                         <th scope="col">Actions</th>
+                        <th scope="col">PDF Attachment</th> <!-- New Column for PDF Link -->
                     </tr>
                 </thead>
                 <tbody>
@@ -113,52 +106,45 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($issue['project']); ?></td>
                         <td><?php echo htmlspecialchars($issue['short_description']); ?></td>
                         <td><?php echo htmlspecialchars($issue['long_description']); ?></td>
-                        <td>
-            <?php echo htmlspecialchars($issue['status']); ?> <!-- Display Status -->
-        </td>
+                        <td><?php echo htmlspecialchars($issue['status']); ?></td>
                         <td><?php echo htmlspecialchars($issue['priority']); ?></td>
                         <td><?php echo $issue['open_date']; ?></td>
                         <td>
-    <!-- Check if the current user is the creator or an admin -->
-    <?php if ($issue['created_by'] == $user_id || (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes')): ?>
-        <a href="edit_issue.php?id=<?php echo $issue['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-        <a href="delete_issue.php?id=<?php echo $issue['id']; ?>" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm">Delete</a>
-    <?php else: ?>
-        <!-- Deny access to editing or deleting -->
-        <!-- <span class="text-muted">No actions available</span> -->
-    <?php endif; ?>
+                            <?php if ($issue['created_by'] == $user_id || (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes')): ?>
+                                <a href="edit_issue.php?id=<?php echo $issue['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="delete_issue.php?id=<?php echo $issue['id']; ?>" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm">Delete</a>
+                            <?php endif; ?>
 
-    <!-- Comments Button -->
-    <button class="btn btn-primary btn-sm" onclick="showComments(<?php echo $issue['id']; ?>)">Comments</button>
+                            <button class="btn btn-primary btn-sm" onclick="showComments(<?php echo $issue['id']; ?>)">Comments</button>
 
-    <!-- Mark as Resolved Button (only shown if the issue is not resolved) -->
-    <?php if ($issue['status'] == 'Not Resolved'): ?>
-        <form method="POST" action="mark_resolved.php" style="display:inline;" id="markResolvedForm_<?php echo $issue['id']; ?>">
-            <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
-            <button type="button" class="btn btn-success btn-sm" onclick="confirmResolution(<?php echo $issue['id']; ?>)">
-                Mark as Resolved
-            </button>
-        </form>
-    <?php else: ?>
-        <!-- If the issue is resolved, show 'Mark as Not Resolved' button for admins -->
-        <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
-            <form method="POST" action="mark_not_resolved.php" style="display:inline;" id="markNotResolvedForm_<?php echo $issue['id']; ?>">
-                <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
-                <button type="button" class="btn btn-warning btn-sm" onclick="confirmNotResolved(<?php echo $issue['id']; ?>)">
-                    Mark as Not Resolved
-                </button>
-            </form>
-        <?php endif; ?>
-    <?php endif; ?>
-</td>
+                            <?php if ($issue['status'] == 'Not Resolved'): ?>
+                                <form method="POST" action="mark_resolved.php" style="display:inline;" id="markResolvedForm_<?php echo $issue['id']; ?>">
+                                    <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="confirmResolution(<?php echo $issue['id']; ?>)">Mark as Resolved</button>
+                                </form>
+                            <?php else: ?>
+                                <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
+                                    <form method="POST" action="mark_not_resolved.php" style="display:inline;" id="markNotResolvedForm_<?php echo $issue['id']; ?>">
+                                        <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="confirmNotResolved(<?php echo $issue['id']; ?>)">Mark as Not Resolved</button>
+                                    </form>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </td>
 
+                        <!-- Display the PDF Link if it exists -->
+                        <td>
+                            <?php if (!empty($issue['pdf_attachment'])): ?>
+                                <a href="<?php echo htmlspecialchars($issue['pdf_attachment']); ?>" target="_blank" class="btn btn-info btn-sm">View PDF</a>
+                            <?php else: ?>
+                                <span>No PDF</span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
 
-                    <!-- Comments Section for this Issue -->
                     <tr id="comments-row-<?php echo $issue['id']; ?>" style="display:none;">
                         <td colspan="7">
                             <div class="comment-section mt-3">
-                                <!-- Add Comment Form -->
                                 <form method="POST" action="" class="mb-3">
                                     <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
                                     <div class="mb-3">
@@ -172,33 +158,23 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <button type="submit" name="comment" class="btn btn-primary btn-sm">Add Comment</button>
                                 </form>
 
-                               <!-- Display Comments for this Issue -->
-<!-- Display Comments for this Issue -->
-<ul class="list-group mt-3">
-    <?php foreach ($comments as $comment): ?>
-        <?php if ($comment['iss_id'] == $issue['id']): ?>
-            <li class="list-group-item">
-                <strong><?php echo htmlspecialchars($comment['fname']) . ' ' . htmlspecialchars($comment['lname']); ?>:</strong> 
-                <?php echo htmlspecialchars($comment['short_comment']); ?>
-                <p><?php echo htmlspecialchars($comment['long_comment']); ?></p>
-                <p><em>Posted on: <?php echo $comment['posted_date']; ?></em></p>
+                                <ul class="list-group mt-3">
+                                    <?php foreach ($comments as $comment): ?>
+                                        <?php if ($comment['iss_id'] == $issue['id']): ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($comment['fname']) . ' ' . htmlspecialchars($comment['lname']); ?>:</strong> 
+                                                <?php echo htmlspecialchars($comment['short_comment']); ?>
+                                                <p><?php echo htmlspecialchars($comment['long_comment']); ?></p>
+                                                <p><em>Posted on: <?php echo $comment['posted_date']; ?></em></p>
 
-                <!-- Show Edit and Delete buttons for the user who created the comment or admin -->
-                <?php if ($comment['per_id'] == $user_id || isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
-                    <!-- Edit Button -->
-                    <a href="edit_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-warning btn-sm">Edit Comment</a>
-
-                    <!-- Delete Button -->
-                    <a href="delete_comment.php?id=<?php echo $comment['id']; ?>" 
-                       onclick="return confirm('Are you sure you want to delete this comment?');" 
-                       class="btn btn-danger btn-sm">Delete Comment</a>
-                <?php endif; ?>
-            </li>
-        <?php endif; ?>
-    <?php endforeach; ?>
-</ul>
-
-
+                                                <?php if ($comment['per_id'] == $user_id || isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
+                                                    <a href="edit_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-warning btn-sm">Edit Comment</a>
+                                                    <a href="delete_comment.php?id=<?php echo $comment['id']; ?>" onclick="return confirm('Are you sure you want to delete this comment?');" class="btn btn-danger btn-sm">Delete Comment</a>
+                                                <?php endif; ?>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -210,51 +186,32 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </div>
 
-<!-- Bootstrap JS and Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 
-<!-- JavaScript to toggle comment section visibility -->
 <script>
     function showComments(issueId) {
         var commentSection = document.getElementById('comments-row-' + issueId);
         if (commentSection.style.display === "none") {
-            commentSection.style.display = "table-row"; // Display the comment section
+            commentSection.style.display = "table-row";
         } else {
-            commentSection.style.display = "none"; // Hide the comment section
+            commentSection.style.display = "none";
         }
     }
 
     function confirmResolution(issueId) {
-        // Show confirmation dialog
         var confirmed = confirm("Are you sure you want to mark this issue as resolved?");
-        
-        if (confirmed) {
-            // If confirmed, submit the form
-            document.getElementById('markResolvedForm_' + issueId).submit();
-        }
-    }
-
-
-    // Confirm dialog for Mark as Resolved
-    function confirmResolution(issueId) {
-        var confirmed = confirm("Are you sure you want to mark this issue as resolved?");
-        
         if (confirmed) {
             document.getElementById('markResolvedForm_' + issueId).submit();
         }
     }
 
-
-     // Confirm dialog for Mark as Not Resolved (for admins)
-     function confirmNotResolved(issueId) {
+    function confirmNotResolved(issueId) {
         var confirmed = confirm("Are you sure you want to mark this issue as not resolved?");
-        
         if (confirmed) {
             document.getElementById('markNotResolvedForm_' + issueId).submit();
         }
     }
-    
 </script>
 
 </body>
