@@ -1,5 +1,6 @@
 <?php
 require_once 'db_connect.php';
+session_start(); // Start the session
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
     $short_description = $_POST['short_description'];
@@ -7,6 +8,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
     $priority = $_POST['priority'];
     $org = $_POST['org'];
     $project = $_POST['project'];
+
+    // Get the logged-in user's ID from the session
+    $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+    // Check if the user is logged in (optional, you can customize this logic)
+    if ($created_by === null) {
+        die("You must be logged in to add an issue.");
+    }
 
     // Set the open date to the current date and time
     $open_date = date('Y-m-d H:i:s'); // Current date and time in 'Y-m-d H:i:s' format
@@ -48,16 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
         }
     }
 
-    // Insert new issue into the database, including the PDF path if it was uploaded
-    $stmt = $pdo->prepare("INSERT INTO iss_issues (short_description, long_description, priority, org, project, open_date, close_date, pdf_attachment) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$short_description, $long_description, $priority, $org, $project, $open_date, $close_date, $pdf_attachment]);
+    // Insert new issue into the database, including the PDF path and created_by field
+    $stmt = $pdo->prepare("INSERT INTO iss_issues (short_description, long_description, priority, org, project, open_date, close_date, pdf_attachment, created_by) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$short_description, $long_description, $priority, $org, $project, $open_date, $close_date, $pdf_attachment, $created_by]);
 
     header('Location: issues_list.php');
     exit();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

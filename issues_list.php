@@ -12,15 +12,33 @@ if (!$user_id) {
     exit;
 }
 
-// Fetch issues from the database, ordered by priority (High -> Medium -> Low)
-$stmt = $pdo->prepare("SELECT * FROM iss_issues 
-                       ORDER BY 
-                           CASE 
-                               WHEN priority = 'High' THEN 1
-                               WHEN priority = 'Medium' THEN 2
-                               WHEN priority = 'Low' THEN 3
-                           END ASC, open_date DESC");
-$stmt->execute();
+// Fetch the logged-in user's first and last name
+$query = "SELECT fname, lname FROM iss_persons WHERE id = :user_id";
+$stmt = $pdo->prepare($query);
+$stmt->execute(['user_id' => $user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$user_name = $user ? $user['fname'] . ' ' . $user['lname'] : 'User'; // Default to 'User' if not found
+
+// Get the search term from the URL if it exists
+$search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '';
+
+// Modify the query to include the search term if it's provided
+$query = "SELECT i.*, p.fname, p.lname 
+          FROM iss_issues i
+          LEFT JOIN iss_persons p ON i.created_by = p.id
+          WHERE i.project LIKE :search 
+             OR i.short_description LIKE :search
+             OR i.long_description LIKE :search
+             OR i.status LIKE :search
+          ORDER BY 
+              CASE 
+                  WHEN priority = 'High' THEN 1
+                  WHEN priority = 'Medium' THEN 2
+                  WHEN priority = 'Low' THEN 3
+              END ASC, open_date DESC";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute(['search' => $search]);
 $issues = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Handle comment submission
@@ -34,9 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
                            VALUES (?, ?, ?, ?, NOW())");
     $stmt->execute([$user_id, $issue_id, $short_comment, $long_comment]);
 
-      // Redirect to the same page to avoid resubmitting the form on refresh
-      header('Location: ' . $_SERVER['REQUEST_URI']);
-      exit;  // Make sure to exit after the redirect
+    // Redirect to the same page to avoid resubmitting the form on refresh
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;  // Make sure to exit after the redirect
 }
 
 // Fetch all comments with the username from the iss_persons table
@@ -74,6 +92,10 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
             <li class="nav-item ms-3">
                 <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
             </li>
+            <!-- Display the user's name in the navbar -->
+            <li class="nav-item ms-3 text-white">
+                <span class="nav-link"><?php echo htmlspecialchars($user_name); ?></span>
+            </li>
             <li class="nav-item ms-3 me-3"> <!-- Add margin-right to only the Logout button -->
                 <a class="nav-link btn btn-success btn-lg text-white" href="login.php">Logout</a>
             </li>
@@ -81,10 +103,16 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </nav>
 
-
-
 <div class="container my-5">
     <h1 class="text-center mb-4">Issues List</h1>
+
+    <!-- Search Form -->
+    <form method="GET" action="issues_list.php" class="mb-4">
+        <div class="input-group">
+            <input type="text" class="form-control" name="search" placeholder="Search issues..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
@@ -95,6 +123,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Issue ID</th>
+                        <th scope="col">Posted By</th> <!-- New column for the person who posted the issue -->
                         <th scope="col">Project Name</th>
                         <th scope="col">Issue Title</th>
                         <th scope="col">Description</th>
@@ -105,10 +134,12 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th scope="col">PDF Attachment</th> <!-- New Column for PDF Link -->
                     </tr>
                 </thead>
+
                 <tbody>
                     <?php foreach ($issues as $issue): ?>
                     <tr>
                         <td><?php echo $issue['id']; ?></td>
+                        <td><?php echo htmlspecialchars($issue['fname']) . ' ' . htmlspecialchars($issue['lname']); ?></td> <!-- Display name of the user who posted the issue -->
                         <td><?php echo htmlspecialchars($issue['project']); ?></td>
                         <td><?php echo htmlspecialchars($issue['short_description']); ?></td>
                         <td><?php echo htmlspecialchars($issue['long_description']); ?></td>

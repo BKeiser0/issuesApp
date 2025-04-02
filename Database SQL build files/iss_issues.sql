@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2025 at 05:41 PM
+-- Generation Time: Apr 02, 2025 at 05:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,10 +47,10 @@ CREATE TABLE `iss_issues` (
 --
 
 INSERT INTO `iss_issues` (`id`, `short_description`, `long_description`, `status`, `open_date`, `close_date`, `priority`, `org`, `project`, `per_id`, `created_by`, `pdf_attachment`) VALUES
-(7, 'Leaky Ceiling', 'There was a leak in the ceiling of the CIS 355 classroom', 'Resolved', '2025-03-24', NULL, 'High', 'SVSU', 'fixing leaky pipe', 0, NULL, NULL),
-(8, 'CS Department Professors', 'The CS department needs to hire more professors.', 'Not Resolved', '2025-03-24', NULL, 'Medium', 'SVSU', 'Hiring professors', 0, NULL, NULL),
-(9, 'White Board Markers', 'All of the white board markers are out of ink.', 'Not Resolved', '2025-03-24', NULL, 'Low', 'SVSU', 'buying more markers', 0, NULL, NULL),
-(10, 'pdf test', 'test', 'Not Resolved', '2025-03-31', NULL, 'High', 'testtest', 'test.org', 0, NULL, './uploads/f9a589dd1dd7939b9839433384549f5b.pdf');
+(7, 'Leaky Ceiling', 'There was a leak in the ceiling of the CIS 355 classroom', 'Resolved', '2025-03-24', NULL, 'High', 'SVSU', 'fixing leaky pipe', 0, 2, NULL),
+(8, 'CS Department Professors', 'The CS department needs to hire more professors.', 'Resolved', '2025-03-24', NULL, 'Medium', 'SVSU', 'Hiring professors', 0, 6, NULL),
+(9, 'White Board Markers', 'All of the white board markers are out of ink.', 'Not Resolved', '2025-03-24', NULL, 'Low', 'SVSU', 'buying more markers', 0, 6, NULL),
+(10, 'pdf test', 'test', 'Not Resolved', '2025-03-31', NULL, 'High', 'testtest', 'test.org', 0, 2, './uploads/f9a589dd1dd7939b9839433384549f5b.pdf');
 
 --
 -- Indexes for dumped tables
@@ -71,7 +71,7 @@ ALTER TABLE `iss_issues`
 -- AUTO_INCREMENT for table `iss_issues`
 --
 ALTER TABLE `iss_issues`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
