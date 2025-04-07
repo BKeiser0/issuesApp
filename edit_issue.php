@@ -1,12 +1,32 @@
 <?php
 require_once 'db_connect.php';
 
+// Start the session
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // Redirect to login page if the user is not logged in
+    header('Location: login.php');
+    exit();
+}
+
 // Fetch the issue details
 if (isset($_GET['id'])) {
     $issue_id = $_GET['id'];
     $stmt = $pdo->prepare("SELECT * FROM iss_issues WHERE id = ?");
     $stmt->execute([$issue_id]);
     $issue = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Check if the issue exists and if the logged-in user can edit it
+if ($issue) {
+    // Check if the logged-in user is the one who created the issue or if they are an admin
+    if ($_SESSION['user_id'] != $issue['created_by'] && (!isset($_SESSION['admin']) || $_SESSION['admin'] != 'yes')) {
+        // If the user is not the creator or an admin, deny access
+        echo "You do not have permission to edit this issue.";
+        exit();
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_issue'])) {

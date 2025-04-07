@@ -77,10 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="card-footer text-center">
                     <small>&copy; 2025 Department Status Report</small>
-                   <br>
-                   <a>TestUsername: bjkeiser@svsu.edu</a>
-                    <br>
-                    <a>TestPassword: SecurePass123</a>
                 </div>
             </div>
         </div>

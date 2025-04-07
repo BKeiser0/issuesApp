@@ -2,6 +2,14 @@
 require_once 'db_connect.php';
 session_start(); // Start the session
 
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // If not logged in, redirect to the login page
+    header("Location: login.php");
+    exit(); // Make sure no further code is executed after redirection
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_issue'])) {
     $short_description = $_POST['short_description'];
     $long_description = $_POST['long_description'];

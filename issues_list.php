@@ -20,22 +20,24 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $user_name = $user ? $user['fname'] . ' ' . $user['lname'] : 'User'; // Default to 'User' if not found
 
 // Get the search term from the URL if it exists
-$search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '';
+$search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : null;
 
-// Modify the query to include the search term if it's provided
+// Modify the query to include all issues by default (when search is null)
 $query = "SELECT i.*, p.fname, p.lname 
           FROM iss_issues i
           LEFT JOIN iss_persons p ON i.created_by = p.id
-          WHERE i.project LIKE :search 
-             OR i.short_description LIKE :search
-             OR i.long_description LIKE :search
-             OR i.status LIKE :search
+          WHERE (:search IS NULL 
+                 OR i.project LIKE :search 
+                 OR i.short_description LIKE :search
+                 OR i.long_description LIKE :search
+                 OR i.status LIKE :search)
           ORDER BY 
               CASE 
                   WHEN priority = 'High' THEN 1
                   WHEN priority = 'Medium' THEN 2
                   WHEN priority = 'Low' THEN 3
               END ASC, open_date DESC";
+
 
 $stmt = $pdo->prepare($query);
 $stmt->execute(['search' => $search]);
@@ -84,21 +86,26 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
+            
+        <!-- Display the user's name in the navbar -->
+            <li class="nav-item ms-3 text-white">
+                <span class="nav-link"><?php echo htmlspecialchars($user_name); ?></span>
+            </li>
+        
             <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
                 <li class="nav-item ms-3">
                     <a class="nav-link btn btn-success btn-lg text-white" href="people.php">People Management</a>
                 </li>
             <?php endif; ?>
+             
             <li class="nav-item ms-3">
                 <a class="nav-link btn btn-success btn-lg text-white" href="add_issue.php">Add New Issue</a>
             </li>
-            <!-- Display the user's name in the navbar -->
-            <li class="nav-item ms-3 text-white">
-                <span class="nav-link"><?php echo htmlspecialchars($user_name); ?></span>
-            </li>
+           
             <li class="nav-item ms-3 me-3"> <!-- Add margin-right to only the Logout button -->
-                <a class="nav-link btn btn-success btn-lg text-white" href="login.php">Logout</a>
-            </li>
+    <a class="nav-link btn btn-success btn-lg text-white" href="logout.php">Logout</a>
+</li>
+
         </ul>
     </div>
 </nav>
@@ -155,18 +162,21 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
                             <button class="btn btn-primary btn-sm" onclick="showComments(<?php echo $issue['id']; ?>)">Comments</button>
 
                             <?php if ($issue['status'] == 'Not Resolved'): ?>
-                                <form method="POST" action="mark_resolved.php" style="display:inline;" id="markResolvedForm_<?php echo $issue['id']; ?>">
-                                    <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
-                                    <button type="button" class="btn btn-success btn-sm" onclick="confirmResolution(<?php echo $issue['id']; ?>)">Mark as Resolved</button>
-                                </form>
-                            <?php else: ?>
-                                <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
-                                    <form method="POST" action="mark_not_resolved.php" style="display:inline;" id="markNotResolvedForm_<?php echo $issue['id']; ?>">
-                                        <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
-                                        <button type="button" class="btn btn-warning btn-sm" onclick="confirmNotResolved(<?php echo $issue['id']; ?>)">Mark as Not Resolved</button>
-                                    </form>
-                                <?php endif; ?>
-                            <?php endif; ?>
+    <?php if ($issue['created_by'] == $user_id || (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes')): ?>
+        <form method="POST" action="mark_resolved.php" style="display:inline;" id="markResolvedForm_<?php echo $issue['id']; ?>">
+            <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
+            <button type="button" class="btn btn-success btn-sm" onclick="confirmResolution(<?php echo $issue['id']; ?>)">Mark as Resolved</button>
+        </form>
+    <?php endif; ?>
+<?php else: ?>
+    <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] == 'yes'): ?>
+        <form method="POST" action="mark_not_resolved.php" style="display:inline;" id="markNotResolvedForm_<?php echo $issue['id']; ?>">
+            <input type="hidden" name="issue_id" value="<?php echo $issue['id']; ?>">
+            <button type="button" class="btn btn-warning btn-sm" onclick="confirmNotResolved(<?php echo $issue['id']; ?>)">Mark as Not Resolved</button>
+        </form>
+    <?php endif; ?>
+<?php endif; ?>
+
                         </td>
 
                         <!-- Display the PDF Link if it exists -->
