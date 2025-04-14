@@ -1,3 +1,5 @@
+Name of the database is: finalproject
+
 ADMINS: Brady
 USERS: George,John,Jane
 
