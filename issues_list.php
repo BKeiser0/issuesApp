@@ -21,29 +21,41 @@ $user_name = $user ? $user['fname'] . ' ' . $user['lname'] : 'User';
 // Get the search term from the URL if it exists
 $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : null;
 
-// Query to fetch issues (search across multiple columns)
+// Get the sort selection; default is 'not_resolved'
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'not_resolved';
+
+// Build the WHERE clause for searching across multiple columns
+$whereClause = "(
+    :search IS NULL
+    OR CAST(i.id AS CHAR) LIKE :search
+    OR i.project LIKE :search 
+    OR i.short_description LIKE :search 
+    OR i.long_description LIKE :search 
+    OR i.status LIKE :search
+    OR i.priority LIKE :search
+    OR i.open_date LIKE :search
+    OR i.pdf_attachment LIKE :search
+    OR p.fname LIKE :search
+    OR p.lname LIKE :search
+)";
+
+// If the user chose "Not Resolved," filter by i.status = 'Not Resolved'
+if ($sort === 'not_resolved') {
+    $whereClause .= " AND i.status = 'Not Resolved'";
+}
+
+// Full query with optional status filter
 $query = "SELECT i.*, p.fname, p.lname 
           FROM iss_issues i
           LEFT JOIN iss_persons p ON i.created_by = p.id
-          WHERE (
-                :search IS NULL
-                OR CAST(i.id AS CHAR) LIKE :search
-                OR i.project LIKE :search 
-                OR i.short_description LIKE :search 
-                OR i.long_description LIKE :search 
-                OR i.status LIKE :search
-                OR i.priority LIKE :search
-                OR i.open_date LIKE :search
-                OR i.pdf_attachment LIKE :search
-                OR p.fname LIKE :search
-                OR p.lname LIKE :search
-          )
+          WHERE $whereClause
           ORDER BY 
               CASE 
                   WHEN i.priority = 'High' THEN 1
                   WHEN i.priority = 'Medium' THEN 2
                   WHEN i.priority = 'Low' THEN 3
               END ASC, i.open_date DESC";
+
 $stmt = $pdo->prepare($query);
 $stmt->execute(['search' => $search]);
 $issues = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -109,14 +121,11 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
       text-align: left;
     }
     .btn-group > .btn:not(:last-child) {
-  margin-right: 5px;
-}
-
-.btn, .btn-group .btn {
-  border-radius: 4px !important;
-}
-
-
+      margin-right: 5px;
+    }
+    .btn, .btn-group .btn {
+      border-radius: 4px !important;
+    }
   </style>
 </head>
 <body>
@@ -167,15 +176,30 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <!-- Search Form -->
   <form method="GET" action="issues_list.php" class="mb-4">
-    <div class="input-group">
-      <input
-        type="text"
-        class="form-control"
-        name="search"
-        placeholder="Search issues..."
-        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>"
-      />
-      <button class="btn btn-primary" type="submit">Search</button>
+    <div class="row g-2">
+      <!-- 3/4 Column: Search bar + Button -->
+      <div class="col-9">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            name="search"
+            placeholder="Search issues..."
+            value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>"
+          />
+          <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+      </div>
+      <!-- 1/4 Column: Sort dropdown (auto-submit on change) -->
+      <div class="col-3">
+        <div class="input-group">
+          <label class="input-group-text" for="sort">Sort By</label>
+          <select class="form-select" id="sort" name="sort" onchange="this.form.submit()">
+            <option value="not_resolved" <?php echo (!isset($_GET['sort']) || $_GET['sort'] === 'not_resolved') ? 'selected' : ''; ?>>Not Resolved</option>
+            <option value="all_issues" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'all_issues') ? 'selected' : ''; ?>>All Issues</option>
+          </select>
+        </div>
+      </div>
     </div>
   </form>
 

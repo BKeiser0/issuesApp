@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </li>
 
             <li class="nav-item me-3"> <!-- Added margin-right to the Logout button -->
-                <a class="nav-link btn btn-danger" href="login.php">Logout</a>
+                <a class="nav-link btn btn-danger" href="logout.php">Logout</a>
             </li>
         </ul>
     </div>
