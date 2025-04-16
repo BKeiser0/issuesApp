@@ -1,5 +1,5 @@
 <?php
-require_once 'db_connect.php';
+require_once 'database/database.php';
 
 // Ensure the request is a POST (avoid GET method for actions that modify data)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

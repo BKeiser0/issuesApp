@@ -1,5 +1,5 @@
 <?php
-require_once 'db_connect.php';
+require_once 'database/database.php';
 session_start(); // Start the session
 
 // Check if the user is logged in
