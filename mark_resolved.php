@@ -16,7 +16,8 @@ if (isset($_POST['issue_id'])) {
     // Validate that issue_id is a positive integer
     if (is_numeric($issue_id) && $issue_id > 0) {
         // Prepare and execute the query to update the issue status to 'Resolved'
-        $stmt = $pdo->prepare("UPDATE iss_issues SET status = 'Resolved' WHERE id = ?");
+        // and assign close_date with the current timestamp.
+        $stmt = $pdo->prepare("UPDATE iss_issues SET status = 'Resolved', close_date = NOW() WHERE id = ?");
         $stmt->execute([$issue_id]);
 
         // Check if the status update was successful
@@ -36,5 +37,4 @@ if (isset($_POST['issue_id'])) {
     // If no issue_id is provided
     echo "Issue ID is required.";
 }
-
 ?>

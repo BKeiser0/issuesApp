@@ -22,8 +22,8 @@ if (isset($_POST['issue_id'])) {
 
     // Validate that the issue_id is numeric and positive
     if (is_numeric($issue_id) && $issue_id > 0) {
-        // Update the status to 'Not Resolved' in the database
-        $stmt = $pdo->prepare("UPDATE iss_issues SET status = 'Not Resolved' WHERE id = ?");
+        // Update the status to 'Not Resolved' and reset the close_date
+        $stmt = $pdo->prepare("UPDATE iss_issues SET status = 'Not Resolved', close_date = NULL WHERE id = ?");
         if ($stmt->execute([$issue_id])) {
             // Successfully updated, redirect to the issues list
             header('Location: issues_list.php');
@@ -40,5 +40,4 @@ if (isset($_POST['issue_id'])) {
     // No issue_id provided
     echo "Issue ID is required.";
 }
-
 ?>

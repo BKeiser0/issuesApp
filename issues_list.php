@@ -1,4 +1,4 @@
-<?php
+<?php 
 require_once 'db_connect.php';
 
 // Start the session
@@ -395,6 +395,12 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="modal-body">
           <h5>Created At: <?php echo $issue['open_date']; ?></h5>
+          <!-- New code to display Close Date -->
+          <?php if (!empty($issue['close_date'])): ?>
+            <h5>Closed At: <?php echo $issue['close_date']; ?></h5>
+          <?php else: ?>
+            <h5>Closed At: <em>Not resolved yet</em></h5>
+          <?php endif; ?>
           <p><strong>Description:</strong></p>
           <p><?php echo nl2br(htmlspecialchars($issue['long_description'])); ?></p>
           <?php if (!empty($issue['pdf_attachment'])): ?>
